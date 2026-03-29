@@ -71,7 +71,7 @@ export default function Home() {
             value={formData.name}
             onChange={handleChange}
             required
-            style={{ width: "100%", padding: "10px", margin: "10px 0" }}
+            style={{ width: "100%", padding: "10px", margin: "10px 0",boxSizing: "border-box", fontSize: "16px" }}
           />
 
           <input
@@ -81,7 +81,7 @@ export default function Home() {
             value={formData.email}
             onChange={handleChange}
             required
-            style={{ width: "100%", padding: "10px", margin: "10px 0" }}
+            style={{ width: "100%", padding: "10px", margin: "10px 0",boxSizing: "border-box", fontSize: "16px" }}
           />
 
           <input
@@ -98,7 +98,7 @@ export default function Home() {
             placeholder="Your concern"
             value={formData.concern}
             onChange={handleChange}
-            style={{ width: "100%", padding: "10px", margin: "10px 0" }}
+            style={{ width: "100%", padding: "10px", margin: "10px 0",boxSizing: "border-box", fontSize: "16px" }}
           />
 
           <button
