@@ -287,3 +287,15 @@
     justify-self: flex-start;
   }
 }
+
+.slotArea { margin-top: 8px; }
+.slotGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.slotButton { border: 1px solid #4FA7A3; background: #f7fffe; color: #2E2E2E; border-radius: 6px; padding: 10px 6px; cursor: pointer; font-weight: 600; }
+.slotButton span { display: block; font-size: 11px; font-weight: 400; color: #666; margin-top: 3px; }
+.slotButton:hover, .slotSelected { background: #4FA7A3; color: #fff; }
+.slotSelected span { color: #fff; }
+.info { color: #777; font-size: 13px; padding: 8px 0; }
+.error, .success { padding: 12px; border-radius: 6px; font-size: 13px; }
+.error { background: #fff1f1; color: #a33; border: 1px solid #efcccc; }
+.success { background: #eefaf7; color: #26705f; border: 1px solid #c5e7dc; }
+@media (max-width: 480px) { .slotGrid { grid-template-columns: repeat(2, 1fr); } }
