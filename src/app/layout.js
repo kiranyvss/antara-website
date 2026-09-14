@@ -12,9 +12,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Antara Counselling & Wellness",
+  title: "Antara Mind Studio",
   description: "Mental Health Support",
-  viewport: "width=device-width, initial-scale=1", // Add this line
+  viewport: "width=device-width, initial-scale=1",
 };
 
 
