@@ -36,7 +36,8 @@ export default function MainContent() {
     "Warm, non-judgmental environment",
     "Personalized care and support",
     "Professional and experienced counsellors",
-    "Flexible scheduling and accessibility"
+    "Flexible scheduling and accessibility",
+    "Added for testing purposes"
   ];
 
   return (
