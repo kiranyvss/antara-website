@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Antara Website + Google Sheets Appointments
 
-## Getting Started
+This version uses the existing Next.js/Vercel website and Google Sheets + Google Apps Script for counsellor availability and appointments. No separate FastAPI server, Render, Railway or PostgreSQL service is required.
 
-First, run the development server:
+## Production architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Browser → Vercel Next.js → `/sheets-api` rewrite → Google Apps Script → Google Sheet
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The Google Sheet is the admin area. Use the `Availability` tab to control counsellor working hours, `Leave` for counsellor leave, `Holidays` for clinic holidays and `Appointments` for bookings.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Required Vercel environment variable
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`GOOGLE_SHEETS_API_URL` = your deployed Google Apps Script Web App `/exec` URL.
 
-## Learn More
+Optional:
 
-To learn more about Next.js, take a look at the following resources:
+`NEXT_PUBLIC_GOOGLE_SHEET_URL` = the Google Sheet URL for the `/admin` helper page.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `GOOGLE_SHEETS_SETUP.md` for the complete step-by-step setup.

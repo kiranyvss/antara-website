@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { staffData, getStaffByService } from "@/data/staff";
+import { staffData } from "@/data/staff";
+import { sheetsGet, sheetsPost } from "@/lib/sheetsApi";
 import styles from "./BookingPanel.module.css";
 
-const API = process.env.NEXT_PUBLIC_BACKEND_PREFIX || "/backend-api";
 const serviceFallback = [
   "Individual Counselling",
   "Student Support",
@@ -30,15 +30,23 @@ export default function BookingPanel() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
   const [types, setTypes] = useState([]);
+  const [counsellors, setCounsellors] = useState([]);
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => { fetch(`${API}/appointment-types`).then(r => r.json()).then(setTypes).catch(() => setTypes([])); }, []);
+  useEffect(() => {
+    Promise.all([sheetsGet({ action: "appointmentTypes" }), sheetsGet({ action: "counsellors" })])
+      .then(([typeData, counsellorData]) => {
+        setTypes(typeData.appointment_types || []);
+        setCounsellors(counsellorData.counsellors || []);
+      })
+      .catch((e) => setError(e.message));
+  }, []);
 
   const services = useMemo(() => types.length ? types.map(x => x.name) : serviceFallback, [types]);
-  const availableStaff = selectedService ? getStaffByService(selectedService) : staffData;
+  const availableStaff = counsellors.length ? counsellors : staffData;
   const selectedType = types.find(x => x.name === selectedService);
   const minDate = todayString();
   const maxDate = addDaysString(60);
@@ -49,8 +57,7 @@ export default function BookingPanel() {
   useEffect(() => {
     if (!selectedStaff || !selectedDate || !selectedType) return;
     setLoadingSlots(true); setSelectedSlot(""); setError("");
-    fetch(`${API}/availability?counsellor_id=${encodeURIComponent(selectedStaff)}&appointment_date=${selectedDate}&appointment_type_id=${selectedType.id}`)
-      .then(async r => { if (!r.ok) throw new Error("Could not load availability"); return r.json(); })
+    sheetsGet({ action: "availability", counsellor_id: selectedStaff, appointment_date: selectedDate, appointment_type_id: selectedType.id })
       .then(data => setSlots(data.slots || []))
       .catch(e => { setSlots([]); setError(e.message); })
       .finally(() => setLoadingSlots(false));
@@ -62,13 +69,18 @@ export default function BookingPanel() {
     e.preventDefault(); setError(""); setMessage("");
     if (!selectedType || !selectedStaff || !selectedDate || !selectedSlot) { setError("Please select service, counsellor, date and time."); return; }
     try {
-      const response = await fetch(`${API}/appointments`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
-        counsellor_id: selectedStaff, appointment_type_id: selectedType.id, appointment_date: selectedDate,
-        start_time: `${selectedSlot}:00`, client_name: clientData.name, client_age: Number(clientData.age), client_gender: clientData.gender,
-        client_phone: clientData.phone, client_email: clientData.email || null
-      }) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || "Unable to book appointment");
+      const data = await sheetsPost({
+        action: "bookAppointment",
+        counsellor_id: selectedStaff,
+        appointment_type_id: selectedType.id,
+        appointment_date: selectedDate,
+        start_time: selectedSlot,
+        client_name: clientData.name,
+        client_age: Number(clientData.age),
+        client_gender: clientData.gender,
+        client_phone: clientData.phone,
+        client_email: clientData.email || ""
+      });
       setMessage(`Appointment booked successfully for ${selectedDate} at ${selectedSlot}. Booking #${data.id}`);
       setSelectedSlot("");
       setSlots(slots.filter(s => s.start_time !== selectedSlot));
@@ -88,7 +100,7 @@ export default function BookingPanel() {
       </div>
       <div className={styles.section}><h3 className={styles.sectionTitle}>Select Service</h3><div className={styles.radioGroup}>{services.map(service => <label key={service} className={styles.radioLabel}><input type="radio" name="service" value={service} checked={selectedService === service} onChange={handleServiceChange} className={styles.radio}/><span>{service}</span></label>)}</div></div>
       {selectedService && <div className={styles.section}><h3 className={styles.sectionTitle}>Select Counsellor</h3><div className={styles.staffGrid}>{availableStaff.map(staff => <div key={staff.id} className={`${styles.staffCard} ${selectedStaff === staff.id ? styles.selected : ""}`} onClick={() => { setSelectedStaff(staff.id); setSelectedDate(""); setSelectedSlot(""); }}>
-        <div className={styles.staffPhotoContainer}><img src={staff.photo} alt={staff.name} className={styles.staffPhoto}/></div><div className={styles.staffInfo}><h4 className={styles.staffName}>{staff.name}</h4><p className={styles.staffQualifications}>{staff.qualifications.split("\n")[0]}</p><p className={styles.staffSpecialization}><strong>Specialization:</strong><br/>{staff.specializations.split("\n").join(", ")}</p><p className={styles.staffFee}>₹{staff.feePerHour}/hour</p></div><input type="radio" name="staff" checked={selectedStaff === staff.id} onChange={() => setSelectedStaff(staff.id)} className={styles.staffRadio}/>
+        <div className={styles.staffPhotoContainer}><img src={staff.photo || "/staff-photos/placeholder-1.jpg"} alt={staff.name} className={styles.staffPhoto}/></div><div className={styles.staffInfo}><h4 className={styles.staffName}>{staff.name}</h4><p className={styles.staffQualifications}>{String(staff.qualifications || "").split("\n")[0]}</p><p className={styles.staffSpecialization}><strong>Specialization:</strong><br/>{String(staff.specializations || "").split("\n").join(", ")}</p><p className={styles.staffFee}>₹{staff.feePerHour || 0}/hour</p></div><input type="radio" name="staff" checked={selectedStaff === staff.id} onChange={() => setSelectedStaff(staff.id)} className={styles.staffRadio}/>
       </div>)}</div></div>}
       {selectedStaff && <div className={styles.section}><h3 className={styles.sectionTitle}>Select Date & Time</h3><input type="date" value={selectedDate} min={minDate} max={maxDate} onChange={e => setSelectedDate(e.target.value)} className={styles.input} required/>{selectedDate && <div className={styles.slotArea}>{loadingSlots ? <p className={styles.info}>Loading available times...</p> : slots.length ? <div className={styles.slotGrid}>{slots.map(slot => <button type="button" key={slot.start_time} className={`${styles.slotButton} ${selectedSlot === slot.start_time ? styles.slotSelected : ""}`} onClick={() => setSelectedSlot(slot.start_time)}>{slot.start_time}<span>{slot.end_time}</span></button>)}</div> : <p className={styles.info}>No available slots for this date. Please choose another date.</p>}</div>}</div>}
       {error && <div className={styles.error}>{error}</div>}{message && <div className={styles.success}>{message}</div>}

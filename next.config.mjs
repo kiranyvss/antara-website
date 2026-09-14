@@ -1,12 +1,12 @@
-/** @type {import('next').NextConfig} */
-const backendUrl = process.env.BACKEND_URL || "http://127.0.0.1:8000";
+const googleSheetsApiUrl = process.env.GOOGLE_SHEETS_API_URL;
 
 const nextConfig = {
   async rewrites() {
+    if (!googleSheetsApiUrl) return [];
     return [
       {
-        source: "/backend-api/:path*",
-        destination: `${backendUrl}/api/:path*`,
+        source: "/sheets-api",
+        destination: googleSheetsApiUrl,
       },
     ];
   },
