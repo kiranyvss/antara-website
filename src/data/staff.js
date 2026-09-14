@@ -6,20 +6,20 @@
 export const staffData = [
   {
     id: "S001",
-    name: "Dr. Sarah Johnson",
-    qualifications: "M.A. Clinical Psychology\nB.A. Psychology\nCertified Cognitive Behavioral Therapist",
+    name: "Meenakshi Yellapragada",
+    qualifications: "M.A. Clinical Psychology\nCertified Cognitive Behavioral Therapist",
     specializations: "Anxiety Disorders\nDepression\nStress Management",
-    feePerHour: 80,
-    detailedInfo: "Dr. Sarah Johnson has over 8 years of experience in clinical psychology. She specializes in anxiety disorders and depression using evidence-based therapeutic approaches.",
-    photo: "/staff-photos/sarah-johnson.jpg"
+    feePerHour: 450,
+    detailedInfo: "Meenakshi has over 8 years of experience in clinical psychology. She specializes in anxiety disorders and depression using evidence-based therapeutic approaches.",
+    photo: "/staff-photos/Meenakshi.jpg"
   },
   {
     id: "S002",
-    name: "Counsellor Michael Chen",
+    name: "Geeta",
     qualifications: "M.Sc. Counselling Psychology\nB.A. Psychology\nAccredited by BACP",
     specializations: "Student Support\nCareer Counselling\nPersonal Development",
-    feePerHour: 60,
-    detailedInfo: "Michael Chen is an accredited counsellor with expertise in student support and career guidance. He creates a warm environment for clients to explore their challenges.",
+    feePerHour: 450,
+    detailedInfo: "Geeta is an accredited counsellor with expertise in student support and career guidance. He creates a warm environment for clients to explore their challenges.",
     photo: "/staff-photos/michael-chen.jpg"
   },
   {
