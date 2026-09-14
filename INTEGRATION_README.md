@@ -52,3 +52,20 @@ Admin page: `http://localhost:3000/admin`
 ## Important
 
 The starter uses a simple admin password/token for local development. Before production, add HTTPS, proper authentication/session management, audit logging, backups, privacy/consent controls, rate limiting and security review.
+
+## Counsellor availability admin screen
+
+The `/admin` page is now included in the Next.js app. Sign in with the backend `ADMIN_PASSWORD` and manage:
+
+- Weekly working-hour windows per counsellor (multiple windows per day supported)
+- Counsellor leave, including partial-day leave
+- Clinic holidays
+- Existing appointments and cancellations
+
+The booking page uses the backend availability calculation, so weekly hours, leave, holidays and booked appointments all affect the slots shown to clients.
+
+### Vercel deployment
+
+The FastAPI backend is a separate service. Set the Vercel project environment variable `BACKEND_URL` to the deployed FastAPI base URL (for example, `https://api.example.com`). Do not leave it pointing to `127.0.0.1` in production.
+
+Set the backend `CORS_ORIGINS` to the deployed Antara website origin. For production, use a persistent PostgreSQL database rather than the local SQLite default, and use a strong `ADMIN_PASSWORD` stored as a secret/environment variable.

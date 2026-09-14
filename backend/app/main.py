@@ -50,9 +50,44 @@ def add_counsellor(payload: CounsellorCreate, db: Session = Depends(get_db)):
 
 @app.post("/api/admin/counsellors/{counsellor_id}/availability", dependencies=[Depends(require_admin)])
 def add_availability(counsellor_id: str, payload: AvailabilityCreate, db: Session = Depends(get_db)):
-    if payload.start_time >= payload.end_time: raise HTTPException(400, "End time must be after start time")
-    if not db.get(Counsellor, counsellor_id): raise HTTPException(404, "Counsellor not found")
-    obj = WeeklyAvailability(counsellor_id=counsellor_id, **payload.model_dump()); db.add(obj); db.commit(); db.refresh(obj); return {"id": obj.id}
+    if payload.start_time >= payload.end_time:
+        raise HTTPException(400, "End time must be after start time")
+    if not db.get(Counsellor, counsellor_id):
+        raise HTTPException(404, "Counsellor not found")
+    existing = db.query(WeeklyAvailability).filter(
+        WeeklyAvailability.counsellor_id == counsellor_id,
+        WeeklyAvailability.weekday == payload.weekday,
+        WeeklyAvailability.active == True
+    ).all()
+    if any(x.start_time < payload.end_time and x.end_time > payload.start_time for x in existing):
+        raise HTTPException(409, "This working-hour window overlaps an existing window")
+    obj = WeeklyAvailability(counsellor_id=counsellor_id, **payload.model_dump())
+    db.add(obj); db.commit(); db.refresh(obj)
+    return {"id": obj.id}
+
+@app.patch("/api/admin/availability/{item_id}", dependencies=[Depends(require_admin)])
+def update_availability(item_id: int, payload: AvailabilityCreate, db: Session = Depends(get_db)):
+    obj = db.get(WeeklyAvailability, item_id)
+    if not obj:
+        raise HTTPException(404, "Availability rule not found")
+    if payload.start_time >= payload.end_time:
+        raise HTTPException(400, "End time must be after start time")
+    if not db.get(Counsellor, obj.counsellor_id):
+        raise HTTPException(404, "Counsellor not found")
+    existing = db.query(WeeklyAvailability).filter(
+        WeeklyAvailability.counsellor_id == obj.counsellor_id,
+        WeeklyAvailability.weekday == payload.weekday,
+        WeeklyAvailability.id != obj.id,
+        WeeklyAvailability.active == True
+    ).all()
+    if any(x.start_time < payload.end_time and x.end_time > payload.start_time for x in existing):
+        raise HTTPException(409, "This working-hour window overlaps an existing window")
+    obj.weekday = payload.weekday
+    obj.start_time = payload.start_time
+    obj.end_time = payload.end_time
+    obj.active = payload.active
+    db.commit()
+    return {"ok": True}
 
 @app.get("/api/admin/counsellors/{counsellor_id}/availability", dependencies=[Depends(require_admin)])
 def list_availability(counsellor_id: str, db: Session = Depends(get_db)):

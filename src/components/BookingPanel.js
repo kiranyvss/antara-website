@@ -4,17 +4,24 @@ import { useEffect, useMemo, useState } from "react";
 import { staffData, getStaffByService } from "@/data/staff";
 import styles from "./BookingPanel.module.css";
 
-const API = "/backend-api";
+const API = process.env.NEXT_PUBLIC_BACKEND_PREFIX || "/backend-api";
 const serviceFallback = [
   "Individual Counselling",
   "Student Support",
   "Anxiety & Stress Management",
   "Parent Guidance",
   "Self Growth",
+  "Added for testing purposes"
 ];
 
-function todayString() { return new Date().toISOString().slice(0, 10); }
-function addDaysString(days) { const d = new Date(); d.setDate(d.getDate() + days); return d.toISOString().slice(0, 10); }
+function localDateString(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+function todayString() { return localDateString(); }
+function addDaysString(days) { const d = new Date(); d.setDate(d.getDate() + days); return localDateString(d); }
 
 export default function BookingPanel() {
   const [clientData, setClientData] = useState({ name: "", age: "", gender: "", phone: "", email: "" });
